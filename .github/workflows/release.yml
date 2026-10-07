@@ -16,6 +16,8 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv sync
       - run: uv run pyinstaller matrix-picker.spec
+      - run: cp LICENSE dist/
+        shell: bash
       - uses: actions/upload-artifact@v4
         with:
           name: matrix-picker-${{ matrix.os }}

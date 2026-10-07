@@ -1,6 +1,6 @@
 [project]
 name = "matrix-picker"
-version = "0.2.0"
+version = "0.2.1"
 description = "Team builder for the Wuthering Waves Endstate Matrix event, with a desktop GUI and CLI."
 readme = "README.md"
 license = "MIT"
