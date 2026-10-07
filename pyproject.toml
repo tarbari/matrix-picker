@@ -3,9 +3,6 @@ name = "matrix-picker"
 version = "0.2.0"
 description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "MikkoP", email = "penttila.mikko@gmail.com" }
-]
 requires-python = ">=3.12"
 dependencies = [
     "pyside6-essentials>=6.7",
