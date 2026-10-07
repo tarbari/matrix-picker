@@ -9,7 +9,7 @@ def render_markdown(session: Session) -> str:
         lines.append(f"## Team {i}")
         for name in team:
             c = session.roster[name]
-            tags = ", ".join(c.roles + c.buffs)
+            tags = ", ".join(c.roles + c.tags)
             lines.append(f"- {name}" + (f" ({tags})" if tags else ""))
         lines.append("")
     lines += ["## Remaining uses", ""]

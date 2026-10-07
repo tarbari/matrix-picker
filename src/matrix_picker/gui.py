@@ -2,10 +2,11 @@ import argparse
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QMimeData, QPoint, Qt
-from PySide6.QtGui import QDrag, QMouseEvent
+from PySide6.QtCore import QMimeData, QSize, Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -20,7 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from .export import render_markdown
-from .models import TEAM_SIZE, Session
+from .models import TEAM_SIZE, Character, Session
 from .roster import TomlRosterSource, load_teams, save_teams
 
 MIME = "application/x-matrix-picker-character"
@@ -38,12 +39,24 @@ class CharacterList(QListWidget):
         return data
 
 
+ICON_SIZE = QSize(32, 32)
+
+
+def character_icon(c: Character) -> QIcon:
+    if c.image and c.image.exists():
+        return QIcon(str(c.image))
+    return QIcon()
+
+
 class Slot(QPushButton):
     """A team slot; click a filled one to remove its character."""
 
-    def __init__(self, text: str) -> None:
+    def __init__(self, text: str, icon: QIcon | None = None) -> None:
         super().__init__(text)
-        self.setMinimumHeight(36)
+        if icon:
+            self.setIcon(icon)
+        self.setIconSize(ICON_SIZE)
+        self.setMinimumHeight(44)
         self.setEnabled(bool(text))
         self.setFlat(not text)
 
@@ -55,12 +68,15 @@ class TeamWidget(QFrame):
         self.index = index
         self.setAcceptDrops(True)
         self.setFrameShape(QFrame.Shape.StyledPanel)
-        layout = QVBoxLayout(self)
-        layout.addWidget(QLabel(f"<b>Team {index + 1}</b>"))
+        layout = QHBoxLayout(self)
+        label = QLabel(f"<b>Team {index + 1}</b>")
+        label.setMinimumWidth(60)
+        layout.addWidget(label)
         team = window.session.teams[index]
         for slot in range(TEAM_SIZE):
             if slot < len(team):
-                button = Slot(team[slot])
+                c = window.session.roster[team[slot]]
+                button = Slot(window.label(c, counts=False), character_icon(c))
                 button.setToolTip("Click to remove")
                 button.clicked.connect(
                     lambda _=False, s=slot: window.remove(self.index, s)
@@ -68,7 +84,7 @@ class TeamWidget(QFrame):
             else:
                 button = Slot("")
                 button.setText("(empty)")
-            layout.addWidget(button)
+            layout.addWidget(button, 1)
 
     def _name(self, event) -> str | None:
         if event.mimeData().hasFormat(MIME):
@@ -99,11 +115,20 @@ class MainWindow(QMainWindow):
         self.resize(900, 600)
 
         self.list = CharacterList()
+        self.list.setIconSize(ICON_SIZE)
         self.list.itemClicked.connect(
             lambda item: self.add(item.data(Qt.ItemDataRole.UserRole))
         )
         left = QVBoxLayout()
+        self.show_roles = QCheckBox("Show roles")
+        self.show_roles.setChecked(True)
+        self.show_tags = QCheckBox("Show tags")
+        self.show_tags.setChecked(True)
+        self.show_roles.toggled.connect(self.refresh)
+        self.show_tags.toggled.connect(self.refresh)
         left.addWidget(QLabel("<b>Characters</b>"))
+        left.addWidget(self.show_roles)
+        left.addWidget(self.show_tags)
         left.addWidget(self.list)
 
         self.teams_layout = QVBoxLayout()
@@ -136,14 +161,20 @@ class MainWindow(QMainWindow):
         self.session.normalize()
         self.refresh()
 
+    def label(self, c: Character, counts: bool = True) -> str:
+        tags = (c.roles if self.show_roles.isChecked() else ()) + (
+            c.tags if self.show_tags.isChecked() else ()
+        )
+        text = c.name
+        if counts:
+            text += f" [{self.session.remaining(c.name)}/{c.max_uses}]"
+        return text + (f" - {', '.join(tags)}" if tags else "")
+
     def refresh(self) -> None:
         self.list.clear()
         for c in self.session.roster.values():
             left = self.session.remaining(c.name)
-            tags = ", ".join(c.roles + c.buffs)
-            item = QListWidgetItem(
-                f"{c.name} [{left}/{c.max_uses}]" + (f" - {tags}" if tags else "")
-            )
+            item = QListWidgetItem(character_icon(c), self.label(c))
             item.setData(Qt.ItemDataRole.UserRole, c.name)
             if left <= 0:
                 item.setFlags(Qt.ItemFlag.NoItemFlags)

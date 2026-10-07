@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 
 TEAM_SIZE = 3
 
@@ -8,7 +9,8 @@ class Character:
     name: str
     max_uses: int
     roles: tuple[str, ...] = ()
-    buffs: tuple[str, ...] = ()
+    tags: tuple[str, ...] = ()
+    image: Path | None = None
 
 
 @dataclass

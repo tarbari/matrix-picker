@@ -8,7 +8,7 @@ from .roster import RosterSource, TomlRosterSource, load_teams, save_teams
 
 def describe(session: Session, name: str, ignore_team: int | None = None) -> str:
     c = session.roster[name]
-    tags = ", ".join(c.roles + c.buffs)
+    tags = ", ".join(c.roles + c.tags)
     left = session.remaining(name, ignore_team)
     return f"{name} [{left}/{c.max_uses} uses]" + (f" - {tags}" if tags else "")
 

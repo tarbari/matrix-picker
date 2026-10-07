@@ -28,7 +28,10 @@ class TomlRosterSource:
                 name=name,
                 max_uses=int(entry.get("max_uses", 1)),
                 roles=tuple(entry.get("roles", [])),
-                buffs=tuple(entry.get("buffs", [])),
+                tags=tuple(entry.get("tags", [])),
+                image=(
+                    self.path.parent / entry["image"] if "image" in entry else None
+                ),
             )
         return roster
 

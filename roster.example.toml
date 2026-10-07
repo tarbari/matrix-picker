@@ -3,22 +3,22 @@
 name = "Iuno"
 max_uses = 2
 roles = ["Support"]
-buffs = ["HA% Buff"]
+tags = ["HA% Buff"]
 
 [[characters]]
 name = "Example DPS"
 max_uses = 1
 roles = ["Main DPS"]
-buffs = []
+tags = []
 
 [[characters]]
 name = "Example Sub"
 max_uses = 1
 roles = ["Sub DPS", "Support"]
-buffs = ["Crit Buff"]
+tags = ["Crit Buff"]
 
 [[characters]]
 name = "Example Healer"
 max_uses = 1
 roles = ["Support"]
-buffs = []
+tags = []
