@@ -86,6 +86,14 @@ class TeamWidget(QFrame):
                 button = Slot("")
                 button.setText("(empty)")
             layout.addWidget(button, 1)
+        done = QCheckBox()
+        done.setChecked(self.index in window.ticked)
+        done.toggled.connect(
+            lambda on: window.ticked.add(self.index)
+            if on
+            else window.ticked.discard(self.index)
+        )
+        layout.addWidget(done)
 
     def _name(self, event) -> str | None:
         if event.mimeData().hasFormat(MIME):
@@ -110,6 +118,7 @@ class MainWindow(QMainWindow):
     def __init__(self, session: Session, state_path: Path, export_path: Path) -> None:
         super().__init__()
         self.session = session
+        self.ticked: set[int] = set()
         self.state_path = state_path
         self.export_path = export_path
         self.setWindowTitle("Endstate Matrix picker")
