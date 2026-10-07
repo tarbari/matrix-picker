@@ -7,10 +7,15 @@ authors = [
     { name = "MikkoP", email = "penttila.mikko@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pyside6-essentials>=6.7",
+]
 
 [project.scripts]
 matrix-picker = "matrix_picker:main"
+
+[project.gui-scripts]
+matrix-picker-gui = "matrix_picker.gui:main"
 
 [build-system]
 requires = ["uv_build>=0.9.4,<0.10.0"]
