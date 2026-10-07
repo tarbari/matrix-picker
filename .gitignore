@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+roster.toml
+state.json
+teams.md

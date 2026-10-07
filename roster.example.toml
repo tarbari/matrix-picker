@@ -1,0 +1,24 @@
+# Copy to roster.toml and edit. Tags are free-form; a character can have several.
+[[characters]]
+name = "Iuno"
+max_uses = 2
+roles = ["Support"]
+buffs = ["HA% Buff"]
+
+[[characters]]
+name = "Example DPS"
+max_uses = 1
+roles = ["Main DPS"]
+buffs = []
+
+[[characters]]
+name = "Example Sub"
+max_uses = 1
+roles = ["Sub DPS", "Support"]
+buffs = ["Crit Buff"]
+
+[[characters]]
+name = "Example Healer"
+max_uses = 1
+roles = ["Support"]
+buffs = []
