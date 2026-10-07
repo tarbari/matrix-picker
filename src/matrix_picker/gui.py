@@ -2,8 +2,8 @@ import argparse
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QMimeData, QSize, Qt
-from PySide6.QtGui import QColor, QDrag, QIcon, QPainter, QPixmap
+from PySide6.QtCore import QMimeData, QPoint, QSize, Qt, QTimer
+from PySide6.QtGui import QColor, QCursor, QDrag, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -57,11 +57,34 @@ class CharacterList(QListWidget):
         )
         painter.drawRect(0, 0, width - 1, pixmap.height() - 1)
         painter.end()
+        ghost = QLabel()
+        ghost.setPixmap(pixmap)
+        ghost.setWindowFlags(
+            Qt.WindowType.ToolTip
+            | Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.WindowTransparentForInput
+        )
+        ghost.setWindowOpacity(0.85)
+        ghost.adjustSize()
+
+        def follow() -> None:
+            ghost.move(QCursor.pos() - QPoint(ghost.width() // 2, ghost.height() // 2))
+
+        timer = QTimer(ghost)
+        timer.timeout.connect(follow)
+        timer.start(15)
+        follow()
+        ghost.show()
         drag = QDrag(self)
         drag.setMimeData(self.mimeData([item]))
         drag.setPixmap(pixmap)
         drag.setHotSpot(pixmap.rect().center())
-        drag.exec(Qt.DropAction.CopyAction)
+        try:
+            drag.exec(Qt.DropAction.CopyAction)
+        finally:
+            timer.stop()
+            ghost.close()
+            ghost.deleteLater()
 
     def mimeData(self, items: list[QListWidgetItem]) -> QMimeData:
         data = QMimeData()
@@ -124,11 +147,16 @@ class TeamWidget(QFrame):
     def dragEnterEvent(self, event) -> None:
         name = self._name(event)
         if name and self.window_.session.can_add(name, self.index):
+            self.setStyleSheet("TeamWidget { background: #cfe8ff; border: 2px solid #3b8eea; }")
             event.acceptProposedAction()
 
     dragMoveEvent = dragEnterEvent
 
+    def dragLeaveEvent(self, event) -> None:
+        self.setStyleSheet("")
+
     def dropEvent(self, event) -> None:
+        self.setStyleSheet("")
         name = self._name(event)
         if name:
             self.window_.add(name, self.index)
