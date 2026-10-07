@@ -48,6 +48,7 @@ The builds are unsigned, so Windows SmartScreen or macOS Gatekeeper may warn on 
 - Pressing Enter in the search box adds the first matching character that still has uses left.
 - The search box filters the character list by name. Start with `tag:` or `role:` to search tags or roles instead (e.g. `tag:shield`, `role:sub`). Matching is case-insensitive and partial.
 - There is always one empty team at the bottom.
+- Each team row has a tick box for your own bookkeeping (e.g. "done"); it is saved in `state.json` and has no other effect.
 - "Show roles" and "Show tags" hide those labels in the character list.
 - "Export to Markdown" writes the teams; "Reset" discards all teams and restores all uses.
 

@@ -29,6 +29,33 @@ class Session:
 
     roster: dict[str, Character]
     teams: list[list[str]] = field(default_factory=list)
+    done: list[bool] = field(default_factory=list)
+
+    def _sync_done(self) -> None:
+        del self.done[len(self.teams) :]
+        self.done.extend([False] * (len(self.teams) - len(self.done)))
+
+    def is_done(self, team_index: int) -> bool:
+        self._sync_done()
+        return self.done[team_index]
+
+    def set_done(self, team_index: int, value: bool) -> None:
+        self._sync_done()
+        self.done[team_index] = value
+
+    def add_team(self, team: list[str]) -> None:
+        self._sync_done()
+        self.teams.append(team)
+        self.done.append(False)
+
+    def remove_team(self, team_index: int) -> None:
+        self._sync_done()
+        del self.teams[team_index]
+        del self.done[team_index]
+
+    def clear(self) -> None:
+        self.teams.clear()
+        self.done.clear()
 
     def used(self, name: str, ignore_team: int | None = None) -> int:
         return sum(
@@ -50,8 +77,12 @@ class Session:
 
     def normalize(self) -> None:
         """Drop empty teams and keep exactly one empty team at the end."""
-        self.teams[:] = [t for t in self.teams if t]
+        self._sync_done()
+        kept = [(t, d) for t, d in zip(self.teams, self.done) if t]
+        self.teams[:] = [t for t, _ in kept]
+        self.done[:] = [d for _, d in kept]
         self.teams.append([])
+        self.done.append(False)
 
     def can_add(self, name: str, team_index: int) -> bool:
         team = self.teams[team_index]

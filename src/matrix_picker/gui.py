@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 
 from .export import render_markdown
 from .models import TEAM_SIZE, Character, Session, matches
-from .roster import TomlRosterSource, ensure_roster, load_teams, save_teams
+from .roster import TomlRosterSource, ensure_roster, load_state, save_state
 
 MIME = "application/x-matrix-picker-character"
 
@@ -87,12 +87,8 @@ class TeamWidget(QFrame):
                 button.setText("(empty)")
             layout.addWidget(button, 1)
         done = QCheckBox()
-        done.setChecked(self.index in window.ticked)
-        done.toggled.connect(
-            lambda on: window.ticked.add(self.index)
-            if on
-            else window.ticked.discard(self.index)
-        )
+        done.setChecked(window.session.is_done(index))
+        done.toggled.connect(lambda on: window.set_done(index, on))
         layout.addWidget(done)
 
     def _name(self, event) -> str | None:
@@ -118,7 +114,6 @@ class MainWindow(QMainWindow):
     def __init__(self, session: Session, state_path: Path, export_path: Path) -> None:
         super().__init__()
         self.session = session
-        self.ticked: set[int] = set()
         self.state_path = state_path
         self.export_path = export_path
         self.setWindowTitle("Endstate Matrix picker")
@@ -215,8 +210,16 @@ class MainWindow(QMainWindow):
             self.teams_layout.addWidget(TeamWidget(self, i))
 
     def save(self) -> None:
-        save_teams(self.state_path, [t for t in self.session.teams if t])
+        self.persist()
         self.refresh()
+
+    def persist(self) -> None:
+        pairs = [(t, d) for t, d in zip(self.session.teams, self.session.done) if t]
+        save_state(self.state_path, [t for t, _ in pairs], [d for _, d in pairs])
+
+    def set_done(self, team_index: int, value: bool) -> None:
+        self.session.set_done(team_index, value)
+        self.persist()
 
     def add(self, name: str, team_index: int | None = None) -> None:
         if self.session.add(name, team_index):
@@ -231,7 +234,7 @@ class MainWindow(QMainWindow):
             self, "Reset", "Discard all teams and restore all uses?"
         )
         if answer == QMessageBox.StandardButton.Yes:
-            self.session.teams.clear()
+            self.session.clear()
             self.session.normalize()
             self.save()
 
@@ -254,7 +257,7 @@ def main() -> None:
     if ensure_roster(args.roster):
         print(f"Created template roster at {args.roster}; edit it to add your characters.")
     roster = TomlRosterSource(args.roster).load()
-    session = Session(roster, load_teams(args.state, roster))
+    session = Session(roster, *load_state(args.state, roster))
     app = QApplication(sys.argv[:1])
     window = MainWindow(session, args.state, args.export)
     window.show()

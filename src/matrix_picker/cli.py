@@ -3,7 +3,7 @@ from pathlib import Path
 
 from .export import render_markdown
 from .models import TEAM_SIZE, Session
-from .roster import RosterSource, TomlRosterSource, ensure_roster, load_teams, save_teams
+from .roster import RosterSource, TomlRosterSource, ensure_roster, load_state, save_state
 
 
 def describe(session: Session, name: str, ignore_team: int | None = None) -> str:
@@ -54,8 +54,8 @@ def build_teams(session: Session, state_path: Path) -> None:
         team = pick_team(session)
         if team is None:
             return
-        session.teams.append(team)
-        save_teams(state_path, session.teams)
+        session.add_team(team)
+        save_state(state_path, session.teams, session.done)
         print(f"Team {len(session.teams)}: {', '.join(team)}")
         if not session.can_form_team():
             break
@@ -94,14 +94,14 @@ def edit_team(session: Session, state_path: Path) -> None:
     team = pick_team(session, ignore_team=index)
     if team is not None:
         session.teams[index] = team
-        save_teams(state_path, session.teams)
+        save_state(state_path, session.teams, session.done)
 
 
 def remove_team(session: Session, state_path: Path) -> None:
     index = choose_team_index(session, "remove")
     if index is not None:
-        session.teams.pop(index)
-        save_teams(state_path, session.teams)
+        session.remove_team(index)
+        save_state(state_path, session.teams, session.done)
 
 
 MENU = """
@@ -117,7 +117,7 @@ Endstate Matrix picker
 
 def run(source: RosterSource, state_path: Path, export_path: Path) -> None:
     roster = source.load()
-    session = Session(roster, load_teams(state_path, roster))
+    session = Session(roster, *load_state(state_path, roster))
     overused = [n for n in roster if session.remaining(n) < 0]
     if overused:
         print(f"Warning: over max uses (roster changed?): {', '.join(overused)}")
@@ -134,8 +134,8 @@ def run(source: RosterSource, state_path: Path, export_path: Path) -> None:
             remove_team(session, state_path)
         elif choice == "5":
             if yes("Discard all teams and restore all uses?"):
-                session.teams.clear()
-                save_teams(state_path, session.teams)
+                session.clear()
+                save_state(state_path, session.teams, session.done)
         elif choice == "6":
             export_path.write_text(render_markdown(session))
             print(f"Exported to {export_path}")

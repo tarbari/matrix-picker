@@ -54,13 +54,19 @@ class TomlRosterSource:
         return roster
 
 
-def load_teams(path: Path, roster: dict[str, Character]) -> list[list[str]]:
+def load_state(
+    path: Path, roster: dict[str, Character]
+) -> tuple[list[list[str]], list[bool]]:
+    """Return (teams, done flags); `done` is absent in older state files."""
     if not path.exists():
-        return []
-    teams = json.loads(path.read_text())["teams"]
+        return [], []
+    data = json.loads(path.read_text())
     # Drop characters removed from the roster; over-used ones are caught by the menu.
-    return [[n for n in team if n in roster] for team in teams]
+    teams = [[n for n in team if n in roster] for team in data["teams"]]
+    done = [bool(d) for d in data.get("done", [])]
+    done += [False] * (len(teams) - len(done))
+    return teams, done[: len(teams)]
 
 
-def save_teams(path: Path, teams: list[list[str]]) -> None:
-    path.write_text(json.dumps({"teams": teams}, indent=2) + "\n")
+def save_state(path: Path, teams: list[list[str]], done: list[bool]) -> None:
+    path.write_text(json.dumps({"teams": teams, "done": done}, indent=2) + "\n")
