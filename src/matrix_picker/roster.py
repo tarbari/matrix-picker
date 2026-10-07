@@ -12,6 +12,24 @@ class RosterSource(Protocol):
     def load(self) -> dict[str, Character]: ...
 
 
+TEMPLATE = """\
+# Roster of owned characters. See the README for the format.
+[[characters]]
+name = "Iuno"
+max_uses = 1
+roles = ["Sub DPS"]
+tags = ["HA Amp", "Lib DMG", "Shield"]
+"""
+
+
+def ensure_roster(path: Path) -> bool:
+    """Write a template roster if missing; returns True if it was created."""
+    if path.exists():
+        return False
+    path.write_text(TEMPLATE, encoding="utf-8")
+    return True
+
+
 class TomlRosterSource:
     def __init__(self, path: Path) -> None:
         self.path = path

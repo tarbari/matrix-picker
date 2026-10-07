@@ -3,7 +3,7 @@ from pathlib import Path
 
 from .export import render_markdown
 from .models import TEAM_SIZE, Session
-from .roster import RosterSource, TomlRosterSource, load_teams, save_teams
+from .roster import RosterSource, TomlRosterSource, ensure_roster, load_teams, save_teams
 
 
 def describe(session: Session, name: str, ignore_team: int | None = None) -> str:
@@ -151,6 +151,6 @@ def main() -> None:
     parser.add_argument("--state", type=Path, default=Path("state.json"))
     parser.add_argument("--export", type=Path, default=Path("teams.md"))
     args = parser.parse_args()
-    if not args.roster.exists():
-        parser.error(f"Roster file not found: {args.roster} (see roster.example.toml)")
+    if ensure_roster(args.roster):
+        print(f"Created template roster at {args.roster}; edit it to add your characters.")
     run(TomlRosterSource(args.roster), args.state, args.export)

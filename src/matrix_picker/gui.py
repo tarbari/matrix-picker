@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
 
 from .export import render_markdown
 from .models import TEAM_SIZE, Character, Session
-from .roster import TomlRosterSource, load_teams, save_teams
+from .roster import TomlRosterSource, ensure_roster, load_teams, save_teams
 
 MIME = "application/x-matrix-picker-character"
 
@@ -223,8 +223,8 @@ def main() -> None:
     parser.add_argument("--state", type=Path, default=Path("state.json"))
     parser.add_argument("--export", type=Path, default=Path("teams.md"))
     args = parser.parse_args()
-    if not args.roster.exists():
-        parser.error(f"Roster file not found: {args.roster} (see roster.example.toml)")
+    if ensure_roster(args.roster):
+        print(f"Created template roster at {args.roster}; edit it to add your characters.")
     roster = TomlRosterSource(args.roster).load()
     session = Session(roster, load_teams(args.state, roster))
     app = QApplication(sys.argv[:1])
