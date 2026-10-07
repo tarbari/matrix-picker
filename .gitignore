@@ -12,3 +12,4 @@ wheels/
 roster.toml
 state.json
 teams.md
+dist/
