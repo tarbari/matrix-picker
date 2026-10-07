@@ -1,13 +1,18 @@
 # AGENTS.md
 
-Guide for AI agents working on matrix-picker: a team builder for the Wuthering Waves Endstate Matrix event, with a Qt GUI and an interactive CLI.
+Guide for AI agents working on matrix-picker: a team builder for the Wuthering
+Waves Endstate Matrix event, with a Qt GUI and an interactive CLI.
 
 ## Setup and running
 
-- Python 3.12+, managed with [uv](https://docs.astral.sh/uv/). The only runtime dependency is `pyside6-essentials`.
-- `uv sync` installs everything; `uv run matrix-picker-gui` starts the GUI, `uv run matrix-picker` the CLI.
-- Both take `--roster`, `--state`, `--export`. A template `roster.toml` is created if missing; `roster.example.toml` is a larger sample.
-- There is no test suite and no linter configured. Verify changes yourself (see below).
+- Python 3.12+, managed with [uv](https://docs.astral.sh/uv/). The only runtime
+dependency is `pyside6-essentials`.
+- `uv sync` installs everything; `uv run matrix-picker-gui` starts the GUI, `uv
+run matrix-picker` the CLI.
+- Both take `--roster`, `--state`, `--export`. A template `roster.toml` is
+created if missing; `roster.example.toml` is a larger sample.
+- There is no test suite and no linter configured. Verify changes yourself (see
+below).
 
 ## Layout
 
@@ -48,5 +53,4 @@ Update `README.md` whenever user-visible behaviour, the roster format or the sta
 - Pushing a tag `vX.Y.Z` runs the release workflow, which builds with PyInstaller on all three OSes and attaches zips (including `LICENSE`) to a GitHub release. Only tag when asked, and bump the version first.
 - Local build: `uv run pyinstaller matrix-picker.spec` -> `dist/` (git-ignored).
 - Commit and push to `main` only when the user asks. End commit messages with `Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>`.
-- Privacy: don't put personal emails, names or local paths in files. Commit author metadata is public once the repo is, so check `git config user.email` is the GitHub noreply address.
 - Never commit `roster.toml`, `state.json`, `teams.md` (git-ignored user data).
