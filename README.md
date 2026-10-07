@@ -1,5 +1,8 @@
 # matrix-picker
 
+>![IMPORTANT]
+> This project is completely written by AI. I have read through the code and it seems fine, and the app works on my computer. I hope it works on yours as well.
+
 A team builder for the Wuthering Waves **Endstate Matrix** event. Pick teams of three from your roster while tracking how many times each character can still be used. It comes with a cross-platform desktop GUI (Qt / PySide6) and an interactive CLI.
 
 ## Features
