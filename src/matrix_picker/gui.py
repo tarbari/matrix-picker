@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QListWidget,
     QListWidgetItem,
     QMainWindow,
@@ -21,7 +22,7 @@ from PySide6.QtWidgets import (
 )
 
 from .export import render_markdown
-from .models import TEAM_SIZE, Character, Session
+from .models import TEAM_SIZE, Character, Session, matches
 from .roster import TomlRosterSource, ensure_roster, load_teams, save_teams
 
 MIME = "application/x-matrix-picker-character"
@@ -126,7 +127,12 @@ class MainWindow(QMainWindow):
         self.show_tags.setChecked(True)
         self.show_roles.toggled.connect(self.refresh)
         self.show_tags.toggled.connect(self.refresh)
+        self.search = QLineEdit()
+        self.search.setPlaceholderText("Search name, or tag:... / role:...")
+        self.search.setClearButtonEnabled(True)
+        self.search.textChanged.connect(self.refresh)
         left.addWidget(QLabel("<b>Characters</b>"))
+        left.addWidget(self.search)
         left.addWidget(self.show_roles)
         left.addWidget(self.show_tags)
         left.addWidget(self.list)
@@ -173,6 +179,8 @@ class MainWindow(QMainWindow):
     def refresh(self) -> None:
         self.list.clear()
         for c in self.session.roster.values():
+            if not matches(c, self.search.text()):
+                continue
             left = self.session.remaining(c.name)
             item = QListWidgetItem(character_icon(c), self.label(c))
             item.setData(Qt.ItemDataRole.UserRole, c.name)

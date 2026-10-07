@@ -13,6 +13,16 @@ class Character:
     image: Path | None = None
 
 
+def matches(c: Character, query: str) -> bool:
+    """Case-insensitive substring match: name by default, `tag:`/`role:` prefixes."""
+    query = query.strip().lower()
+    for prefix, values in (("tag:", c.tags), ("role:", c.roles)):
+        if query.startswith(prefix):
+            term = query[len(prefix) :].strip()
+            return not term or any(term in v.lower() for v in values)
+    return query in c.name.lower()
+
+
 @dataclass
 class Session:
     """Roster plus the teams picked so far; remaining uses are derived from the teams."""

@@ -45,6 +45,7 @@ The builds are unsigned, so Windows SmartScreen or macOS Gatekeeper may warn on 
 - Characters are on the left; teams are on the right, one row per team of three.
 - Click a character to add it to the first team with a free slot, or drag it onto a specific team.
 - Click a filled slot to remove its character.
+- The search box filters the character list by name. Start with `tag:` or `role:` to search tags or roles instead (e.g. `tag:shield`, `role:sub`). Matching is case-insensitive and partial.
 - There is always one empty team at the bottom.
 - "Show roles" and "Show tags" hide those labels in the character list.
 - "Export to Markdown" writes the teams; "Reset" discards all teams and restores all uses.
