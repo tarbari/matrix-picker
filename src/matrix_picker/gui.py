@@ -129,6 +129,7 @@ class MainWindow(QMainWindow):
         self.search.setPlaceholderText("Search name, or tag:... / role:...")
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(self.refresh)
+        self.search.returnPressed.connect(self.add_first_match)
         left.addWidget(QLabel("<b>Characters</b>"))
         left.addWidget(self.search)
         left.addWidget(self.show_roles)
@@ -169,6 +170,13 @@ class MainWindow(QMainWindow):
         self.add(item.data(Qt.ItemDataRole.UserRole))
         self.search.setFocus()
         self.search.selectAll()
+
+    def add_first_match(self) -> None:
+        for i in range(self.list.count()):
+            item = self.list.item(i)
+            if item.flags() & Qt.ItemFlag.ItemIsEnabled:
+                self.on_item_clicked(item)
+                return
 
     def label(self, c: Character, counts: bool = True) -> str:
         tags = (c.roles if self.show_roles.isChecked() else ()) + (
