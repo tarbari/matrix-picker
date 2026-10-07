@@ -117,9 +117,7 @@ class MainWindow(QMainWindow):
 
         self.list = CharacterList()
         self.list.setIconSize(ICON_SIZE)
-        self.list.itemClicked.connect(
-            lambda item: self.add(item.data(Qt.ItemDataRole.UserRole))
-        )
+        self.list.itemClicked.connect(self.on_item_clicked)
         left = QVBoxLayout()
         self.show_roles = QCheckBox("Show roles")
         self.show_roles.setChecked(True)
@@ -166,6 +164,11 @@ class MainWindow(QMainWindow):
 
         self.session.normalize()
         self.refresh()
+
+    def on_item_clicked(self, item: QListWidgetItem) -> None:
+        self.add(item.data(Qt.ItemDataRole.UserRole))
+        self.search.setFocus()
+        self.search.selectAll()
 
     def label(self, c: Character, counts: bool = True) -> str:
         tags = (c.roles if self.show_roles.isChecked() else ()) + (
