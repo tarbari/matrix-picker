@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from PySide6.QtCore import QMimeData, QSize, Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QColor, QDrag, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -32,6 +32,36 @@ class CharacterList(QListWidget):
         super().__init__()
         self.setDragEnabled(True)
         self.setDragDropMode(QListWidget.DragDropMode.DragOnly)
+
+    def startDrag(self, supportedActions: Qt.DropAction) -> None:
+        item = self.currentItem()
+        if item is None:
+            return
+        font_metrics = self.fontMetrics()
+        text = item.data(Qt.ItemDataRole.UserRole)
+        width = ICON_SIZE.width() + font_metrics.horizontalAdvance(text) + 24
+        pixmap = QPixmap(width, ICON_SIZE.height() + 8)
+        pixmap.fill(QColor(255, 255, 255, 230))
+        painter = QPainter(pixmap)
+        icon = item.icon()
+        if not icon.isNull():
+            icon.paint(painter, 4, 4, ICON_SIZE.width(), ICON_SIZE.height())
+        painter.setPen(QColor("black"))
+        painter.drawText(
+            ICON_SIZE.width() + 12,
+            0,
+            width,
+            pixmap.height(),
+            Qt.AlignmentFlag.AlignVCenter,
+            text,
+        )
+        painter.drawRect(0, 0, width - 1, pixmap.height() - 1)
+        painter.end()
+        drag = QDrag(self)
+        drag.setMimeData(self.mimeData([item]))
+        drag.setPixmap(pixmap)
+        drag.setHotSpot(pixmap.rect().center())
+        drag.exec(Qt.DropAction.CopyAction)
 
     def mimeData(self, items: list[QListWidgetItem]) -> QMimeData:
         data = QMimeData()
@@ -76,7 +106,7 @@ class TeamWidget(QFrame):
         for slot in range(TEAM_SIZE):
             if slot < len(team):
                 c = window.session.roster[team[slot]]
-                button = Slot(window.label(c, counts=False), character_icon(c))
+                button = Slot(c.name, character_icon(c))
                 button.setToolTip("Click to remove")
                 button.clicked.connect(
                     lambda _=False, s=slot: window.remove(self.index, s)
