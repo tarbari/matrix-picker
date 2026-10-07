@@ -1,7 +1,7 @@
 [project]
 name = "matrix-picker"
 version = "0.2.0"
-description = "Add your description here"
+description = "Team builder for the Wuthering Waves Endstate Matrix event, with a desktop GUI and CLI."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
