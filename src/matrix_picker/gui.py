@@ -76,7 +76,7 @@ class TeamWidget(QFrame):
         for slot in range(TEAM_SIZE):
             if slot < len(team):
                 c = window.session.roster[team[slot]]
-                button = Slot(window.label(c, counts=False), character_icon(c))
+                button = Slot(c.name, character_icon(c))
                 button.setToolTip("Click to remove")
                 button.clicked.connect(
                     lambda _=False, s=slot: window.remove(self.index, s)
